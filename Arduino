@@ -1,0 +1,47 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// Common I2C address is 0x27 or 0x3F
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+String incomingText = "";
+
+void setup() {
+  Serial.begin(9600);
+
+  lcd.init();
+  lcd.backlight();
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Leaf Disease");
+  lcd.setCursor(0, 1);
+  lcd.print("System Ready");
+}
+
+void loop() {
+  while (Serial.available() > 0) {
+    char c = Serial.read();
+
+    if (c == '\n') {
+      incomingText.trim();
+
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Detected:");
+
+      lcd.setCursor(0, 1);
+
+      // If text too long, cut to 16 chars
+      if (incomingText.length() > 16) {
+        lcd.print(incomingText.substring(0, 16));
+      } else {
+        lcd.print(incomingText);
+      }
+
+      incomingText = "";
+    } else {
+      incomingText += c;
+    }
+  }
+}
